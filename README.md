@@ -1,2 +1,2 @@
-<b>Cataloger</b><br/>
+# Cataloger
 Automatic Music Cataloging tool to help music enthusiasts catalog their songs properly.
