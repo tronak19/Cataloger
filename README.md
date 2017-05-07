@@ -7,6 +7,7 @@ Automated Music Cataloging Software for all music enthusiasts. This project make
 
 Contributors : 
 
-[Kushal Vyas](https://github.com/kushalvyas)
-[Ronak Thakker](https://github.com/tronak19)
+- [Kushal Vyas](https://github.com/kushalvyas)
+
+- [Ronak Thakker](https://github.com/tronak19)
 
