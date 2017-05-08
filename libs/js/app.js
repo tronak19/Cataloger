@@ -12,8 +12,10 @@ var table_head = document.getElementById("table_head");
 var table_body = document.getElementById("table_body");
 var checked_all_flag = false;
 var update_progress_bar_counter = 0;
+var i=0;
 var full_path;
 var len;
+var items = [];
 
 $(document).ready(function(){
 
@@ -43,31 +45,25 @@ function reset(){
 }
 
 function populate_file_lists(path){
-	fs.readdir(path, function(err, items){
+	fs.readdir(path, function(err, items_){
+		items = items_.slice();
 		console.log("File contents are ", items);
 		counter = 0;
-		for(var i=0; i<items.length; i++){
+		for(i=0; i<items.length; i++){
 			console.log(items[i]);
 			if((items[i].indexOf(".mp3") != -1) && (items[i].indexOf(".mp3") == (items[i].length-4))){
 				
 				full_path = path+"\\"+items[i];
-				len = get_duration(full_path);
-				console.log("len = ", len);
+		
 				var file_obj = {
 					count:counter,
 					original_file:items[i],
 					path:path,
 					checked:true,
-					song_duration:len
 				}
 				files.push(file_obj);
 				console.log("file_obj = ", file_obj);
-				
-				// setTimeout(function(){
-				//   files.push(file_obj);
-				//   console.log("file_obj = ", file_obj);
-				// }, 10000);
-
+			
 				// populate table
 				var curr_row = table_body.rows.length;			
 				console.log("curr_row = ", curr_row);
@@ -80,6 +76,9 @@ function populate_file_lists(path){
 				// cell3.innerHTML = file_obj.converted_file;
 				cell3.innerHTML = "<p id=\"converted_"+counter+"\">" +  "</p>";
 				counter+=1;
+				console.log("files" );
+				console.log(files);	
+				
 			}
 		}
 	});
@@ -89,11 +88,15 @@ function populate_file_lists(path){
 	// go();
 }
 
-function get_duration(full_path){
+function get_duration(i){
+	full_path = files[i].path + "\\" + files[i].original_file;
+	console.log("inside get_duration : path is " , full_path);
 	mp3Duration(full_path, function (err, duration) {
   					if (err) return console.log(err.message);
-  					len = Math.round(duration);
+  					// len = Math.round(duration);
+  					len = duration;
 					console.log('Duration = ', len);
+					return len;
 				});
 	return len;
 }
@@ -160,46 +163,55 @@ function go(){
 
 function response_callback(i){
 	return function(err, results){
-		if (err) throw err;
-		console.log(i);
-		console.log("results = ", results);
-		files[i].response = results;
-		// update columns
-		
-		var lower_limit=files[i].len-2;
-		var upper_limit=files[i].len+2;
-		console.log("LL = "+lower_limit+"\nUL = "+upper_limit);
-		console.log("FP = ",files[i].path);
-		
-		if(results.length > 0){
-			for(j=0; j<results[0].recordings.length; j++){
-				if (results[0].recordings[j].duration>lower_limit && results[0].recordings[j].duration<upper_limit){
-					var recordings = results[0].recordings[j];
-					var artist_name = recordings.artists[0].name;
-					var title = recordings.title;
-					console.log(artist_name + " - " + title);
+		var full_path = files[i].path + "\\" + files[i].original_file;
+		return mp3Duration(full_path, function(err, duration){
+			console.log("duration is ", duration);
+			console.log("I IS " , i);
+			console.log("other data is ", results);
+			
+			
+			console.log("LEN IS : " + len);
+			if (err) throw err;
+			console.log(i);
+			console.log("results = ", results);
+			files[i].response = results;
+			// update columns
+			
+			var lower_limit=duration-2;
+			var upper_limit=duration+2;
+			console.log("LL = "+lower_limit+"\nUL = "+upper_limit);
+			console.log("FP = ",files[i].path);
+			if(results.length > 0){
+				var recordings, artist_name, title;
+				for(j=0; j<results[0].recordings.length; j++){
+					if (results[0].recordings[j].duration>lower_limit && results[0].recordings[j].duration<upper_limit){
+						recordings = results[0].recordings[j];
+						artist_name = recordings.artists[0].name;
+						title = recordings.title;
+						console.log(artist_name + " - " + title);
+					}
+
 				}
 
+				// var first_result = results[0];
+				// var recordings = first_result.recordings[0];
+				// var artist_name = recordings.artists[0].name;
+				// var title = recordings.title;
+				// console.log(title + " - " + artist_name);
+				var final_new_name = artist_name + " - " + title + ".mp3";
+				files[i].converted_file = final_new_name;
+
+				// update ui
+				// $($("#table_body tr")[i]).eq(2).html("aaa");
+				console.log($("#converted_"+ String(i)));
+				$("#converted_"+String(i)).html(final_new_name);
+				value_now = Math.round((((update_progress_bar_counter++) + 1)/files.length)*100);
+				$("#progressbar").css('width', value_now+"%").attr("aria-valuenow", value_now);
 			}
 
-			// var first_result = results[0];
-			// var recordings = first_result.recordings[0];
-			// var artist_name = recordings.artists[0].name;
-			// var title = recordings.title;
-			// console.log(title + " - " + artist_name);
-			var final_new_name = artist_name + " - " + title + ".mp3";
-			files[i].converted_file = final_new_name;
-
-			// update ui
-			// $($("#table_body tr")[i]).eq(2).html("aaa");
-			console.log($("#converted_"+ String(i)));
-			$("#converted_"+String(i)).html(final_new_name);
-			value_now = Math.round((((update_progress_bar_counter++) + 1)/files.length)*100);
-			$("#progressbar").css('width', value_now+"%").attr("aria-valuenow", value_now);
-		}
-
-		else $("#converted_"+String(i)).html("No match found in database");
-
+			else $("#converted_"+String(i)).html("No match found in database");
+			
+		});
 	}
 }
 
