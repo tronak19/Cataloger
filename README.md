@@ -1,13 +1,11 @@
 # Cataloger
 
 
-Automated Music Cataloging Software for all music enthusiasts. This project makes use of Chromaprint's & Acoustid's audio fingerprinting libraries.
+Automatic Music Cataloging tool to help music enthusiasts catalog their songs properly using audio fingerprinting.
+This project employs Chromaprint and AcoustID audio fingerprinting libraries.
 
 
-
-Contributors : 
+Contributors:
 
 - [Kushal Vyas](https://github.com/kushalvyas)
-
-- [Ronak Thakker](https://github.com/tronak19)
-
+- [Ronak Thakkar](https://github.com/tronak19)
